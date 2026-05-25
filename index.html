@@ -48,13 +48,19 @@
 
     <button class="btn-calc" onclick="generatePanchangam()">Calculate Daily Almanac</button>
 
-    <div id="result" class="result-box">
+<div id="result" class="result-box">
         <div class="result-line"><strong>Calculated Location:</strong> <span id="out-loc"></span></div>
         <div class="result-line"><strong>Vaaram (Day):</strong> <span id="out-vaaram"></span></div>
         <div class="result-line"><strong>Tamil Month:</strong> <span id="out-month"></span></div>
         <div class="result-line"><strong>Paksham:</strong> <span id="out-paksha"></span></div>
         <div class="result-line"><strong>Thithi:</strong> <span id="out-thithi"></span></div>
         <div class="result-line"><strong>Nakshatram:</strong> <span id="out-nakshatra"></span></div>
+        
+        <!-- This is the newly added block for the automatic daily Sankalpam script -->
+        <div class="result-line" style="background: #fff3cd; border: 1px dashed #ffeba0; padding: 12px; margin-top: 15px; border-radius: 6px;">
+            <strong>Daily Sankalpam Script:</strong>
+            <p id="out-sankalpam" style="font-style: italic; line-height: 1.6; font-size: 15px; margin: 8px 0 0 0; color: #555;"></p>
+        </div>
     </div>
 </div>
 
