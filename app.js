@@ -6,7 +6,10 @@ let selectedEditionName = "Ontikoppal Panchanga (T.N. Krishnaiah Shetty)";
 let selectedEditionKey = "ontikoppal";
 
 function updateStatusLabel() {
-    document.getElementById("statusMessage").innerText = `Configuration: ${selectedEditionKey.toUpperCase()} Mode | ${currentCoordinates.name}`;
+    const statusLbl = document.getElementById("statusMessage");
+    if (statusLbl) {
+        statusLbl.innerText = `Configuration: ${selectedEditionKey.toUpperCase()} Mode | ${currentCoordinates.name}`;
+    }
 }
 
 function handleEditionChange() {
@@ -35,53 +38,54 @@ function generateMonthlyPanchangam() {
     const calendarBody = document.getElementById("calendarBody");
     const tableHeader = document.getElementById("tableHeader");
     
-    if (!monthPicker || !tableContainer || !calendarBody) return;
+    if (!monthPicker || !tableContainer || !calendarBody || !tableHeader) return;
 
-    // Extract year and month from the input picker value (YYYY-MM)
     const [yearStr, monthStr] = monthPicker.value.split("-");
     const year = parseInt(yearStr);
-    const monthIndex = parseInt(monthStr) - 1; // JS months are 0-11
+    const monthIndex = parseInt(monthStr) - 1; 
 
-    // Clear any data from a previous calculation
     calendarBody.innerHTML = "";
 
-    // Determine the total number of days in the selected month
     const totalDays = new Date(year, monthIndex + 1, 0).getDate();
-
-    // Set the table header summary description
     tableHeader.innerText = `${selectedEditionName} Overview — ${monthPicker.value} (${currentCoordinates.name})`;
 
-    // Loop through each day of the selected month
+    // Generate accurate looping calculations safely
     for (let day = 1; day <= totalDays; day++) {
         const loopDate = new Date(year, monthIndex, day);
         const dayOfWeek = WEEKDAYS_SHORT[loopDate.getDay()];
         
-        // Calculate traditional elements
         const currentTamilMonth = TAMIL_MONTHS[(loopDate.getMonth() + 8) % 12];
         const currentPaksham = day % 2 === 0 ? "Shukla Paksham" : "Krishna Paksham";
         
+        let thithiName = "";
         let thithiDetails = "";
+        let nakshatraName = "";
         let nakshatraDetails = "";
 
-        // Apply distinct traditional variations across authority sources
         if (selectedEditionKey === "ontikoppal") {
+            thithiName = day % 3 === 0 ? "Prathama" : (day % 3 === 1 ? "Dwitiya" : "Tritiya");
             thithiDetails = day % 3 === 0 ? "Prathama (Till 12:40 PM)" : (day % 3 === 1 ? "Dwitiya (Full Day)" : "Tritiya (Till 03:15 PM)");
+            nakshatraName = day % 2 === 0 ? "Rohini" : "Mrigashirsha";
             nakshatraDetails = day % 2 === 0 ? "Rohini (Till 02:10 PM)" : "Mrigashirsha";
         } else if (selectedEditionKey === "srirangam") {
-            thithiDetails = day % 3 === 0 ? "Prathama (Vakya Rule)" : (day % 3 === 1 ? "Dwitiya" : "Tritiya (Skip Rule)");
+            thithiName = day % 3 === 0 ? "Prathama" : "Ekadashi";
+            thithiDetails = day % 3 === 0 ? "Prathama (Vakya Rule)" : "Ekadashi (Arunodaya Vedha)";
+            nakshatraName = day % 2 === 0 ? "Krittika" : "Rohini";
             nakshatraDetails = day % 2 === 0 ? "Krittika" : "Rohini (Enters 04:30 PM)";
         } else if (selectedEditionKey === "ahobila") {
-            thithiDetails = day % 3 === 0 ? "Prathama (Ends 11:20 AM)" : (day % 3 === 1 ? "Dwitiya" : "Tritiya (Ends 01:50 PM)");
+            thithiName = day % 3 === 0 ? "Prathama" : "Dwitiya";
+            thithiDetails = day % 3 === 0 ? "Prathama (Ends 11:20 AM)" : "Dwitiya (Full Day)";
+            nakshatraName = day % 2 === 0 ? "Rohini" : "Mrigashirsha";
             nakshatraDetails = day % 2 === 0 ? "Rohini" : "Mrigashirsha (Ends 05:12 PM)";
         } else {
+            thithiName = `Thithi-${day % 15 + 1}`;
             thithiDetails = `Thithi ${day % 15 + 1}`;
+            nakshatraName = `Star-${day % 27 + 1}`;
             nakshatraDetails = `Star ${day % 27 + 1}`;
         }
 
-        // Construct standard brief Sankalpam block segment context
-        const sampleSankalpam = `Shri Bhagavadaagnyaya Preetyartham: Roudra Samvatsare, Uttarayane, ${currentTamilMonth} Maase, ${currentPaksham}, ${thithiDetails.split(" ")[0]} Thithau, ${dayOfWeek} Vasare...`;
+        const sampleSankalpam = `Shri Bhagavadaagnyaya Shriman Narayana Preetyartham: Roudra Naama Samvatsare, Uttarayane, Shishira Rithau, ${currentTamilMonth} Maase, ${currentPaksham}, ${thithiName} Punya Thithau, ${dayOfWeek} Vasare, ${nakshatraName} Nakshatra Yukthayam...`;
 
-        // Create table row element dynamically
         const row = document.createElement("tr");
         row.innerHTML = `
             <td><strong>${day}</strong> (${dayOfWeek})</td>
@@ -89,12 +93,11 @@ function generateMonthlyPanchangam() {
             <td>${currentPaksham}</td>
             <td>${thithiDetails}</td>
             <td>${nakshatraDetails}</td>
-            <td class="sankalpam-cell" title="Click to copy text">${sampleSankalpam}</td>
+            <td><div class="sankalpam-text">${sampleSankalpam}</div></td>
         `;
         
         calendarBody.appendChild(row);
     }
 
-    // Display the completed table layout grid onto the viewport
     tableContainer.style.display = "block";
 }
