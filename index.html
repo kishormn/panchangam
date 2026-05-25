@@ -8,13 +8,15 @@
         body { font-family: Arial, sans-serif; background-color: #fcfcfc; padding: 20px; text-align: center; color: #333; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-top: 5px solid #d32f2f; }
         h1 { color: #d32f2f; font-size: 24px; margin-bottom: 5px; }
-        .picker-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #eee; }
-        .select-style { width: 100%; padding: 10px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 12px; }
+        .picker-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #eee; text-align: left; }
+        label { font-weight: bold; font-size: 13px; color: #555; display: block; margin-bottom: 4px; }
+        .select-style { width: 100%; padding: 10px; font-size: 15px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 12px; display: block; }
         .btn-gps { background: #007bff; color: white; border: none; padding: 10px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px; }
         .btn-calc { background: #d32f2f; color: white; border: none; padding: 12px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; }
-        .status-msg { font-size: 13px; color: #666; margin: 5px 0 15px 0; font-style: italic; }
+        .status-msg { font-size: 13px; color: #666; margin: 5px 0 5px 0; font-style: italic; text-align: center; }
         .result-box { text-align: left; background: #fffcf5; border: 1px solid #f5ebd5; padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
         .result-line { margin: 10px 0; font-size: 16px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
+        .badge { background: #e6f4ea; color: #137333; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -24,25 +26,35 @@
     <p style="color:#666; font-size: 14px; margin-top: 0;">Free Community Almanac Utility</p>
     
     <div class="picker-section">
+        <!-- 1. ALMANAC AUTHORITY PICKER -->
+        <label for="editionSelect">📖 SELECT PANCHANGAM TRADITION / EDITION:</label>
+        <select id="editionSelect" class="select-style" onchange="handleEditionChange()">
+            <option value="ontikoppal">Ontikoppal Panchanga (T.N. Krishnaiah Shetty & Sons)</option>
+            <option value="srirangam">Srirangam Asmadh Acharyan Vakya Panchangam</option>
+            <option value="drigganitha">Pure Drigganitha (Modern Ephemeris Calculation)</option>
+            <option value="ahobila">Ahobila Mutt Panchangam Edition</option>
+        </select>
+
+        <!-- 2. PHYSICAL LOCATION PICKER -->
+        <label for="citySelect">📍 TARGET GEOGRAPHY LOCATION:</label>
         <button class="btn-gps" onclick="getLocationByGPS()">📍 Use Current GPS Location</button>
-        <p style="margin: 5px 0; font-weight: bold; color: #888;">— OR SELECT CITY —</p>
+        <div style="text-align: center; margin: 5px 0; font-size: 12px; font-weight: bold; color: #aaa;">— OR CHOOSE PRESURVEYED CITY —</div>
         
         <select id="citySelect" class="select-style" onchange="handleCityChange()">
             <option value="12.9716,77.5946">Bengaluru (Default)</option>
             <option value="13.0827,80.2707">Chennai (Madras)</option>
             <option value="10.8606,78.6882">Srirangam / Trichy</option>
-            <option value="9.9252,78.1198">Madurai</option>
             <option value="11.9416,79.8083">Kanchipuram</option>
             <option value="12.1207,76.6710">Melukote / Mysore</option>
-            <option value="13.6288,79.4192">Tirupati</option>
         </select>
 
-        <div id="statusMessage" class="status-msg">Using Location: Bengaluru</div>
+        <div id="statusMessage" class="status-msg">System Configuration: Ontikoppal Mode | Bengaluru</div>
     </div>
 
     <button class="btn-calc" onclick="generatePanchangam()">Calculate Daily Almanac</button>
 
     <div id="result" class="result-box">
+        <div class="result-line"><strong>Almanac Authority:</strong> <span id="out-edition" style="color:#d32f2f; font-weight:bold;"></span></div>
         <div class="result-line"><strong>Calculated Location:</strong> <span id="out-loc"></span></div>
         <div class="result-line"><strong>Vaaram (Day):</strong> <span id="out-vaaram"></span></div>
         <div class="result-line"><strong>Tamil Month:</strong> <span id="out-month"></span></div>
@@ -51,7 +63,7 @@
         <div class="result-line"><strong>Nakshatram:</strong> <span id="out-nakshatra"></span></div>
         
         <div class="result-line" style="background: #fff3cd; border: 1px dashed #ffeba0; padding: 12px; margin-top: 15px; border-radius: 6px;">
-            <strong>Daily Sankalpam Script:</strong>
+            <strong>Daily Iyengar Sankalpam Script:</strong>
             <p id="out-sankalpam" style="font-style: italic; line-height: 1.6; font-size: 14px; margin: 8px 0 0 0; color: #444;"></p>
         </div>
     </div>
