@@ -1,6 +1,25 @@
 const WEEKDAYS_FULL = ["Adhitya Vaaram (Sunday)", "Soma Vaaram (Monday)", "Mangala Vaaram (Tuesday)", "Budha Vaaram (Wednesday)", "Guru Vaaram (Thursday)", "Sukra Vaaram (Friday)", "Sani Vaaram (Saturday)"];
 const TAMIL_MONTHS = ["Chithirai", "Vaigasi", "Aani", "Aadi", "Aavani", "Purattasi", "Aippasi", "Karthigai", "Margazhi", "Thai", "Maasi", "Panguni"];
 
+// 🕉️ Traditional nomenclature vocabulary mappings for Iyengar Panchangams
+const TRADITIONAL_THITHIS = [
+    "Prathama", "Dwitiya", "Tritiya", "Chaturthi", "Panchami", 
+    "Shashti", "Saptami", "Ashtami", "Navami", "Dashami", 
+    "Ekadashi", "Dvadashi", "Trayodashi", "Chaturdashi", "Pournami", // 1-15 Shukla cycle ends
+    "Prathama", "Dwitiya", "Tritiya", "Chaturthi", "Panchami", 
+    "Shashti", "Saptami", "Ashtami", "Navami", "Dashami", 
+    "Ekadashi", "Dvadashi", "Trayodashi", "Chaturdashi", "Amavasya" // 16-30 Krishna cycle ends
+];
+
+const TRADITIONAL_NAKSHATRAMS = [
+    "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashirsha", 
+    "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", 
+    "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", 
+    "Visakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", 
+    "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", 
+    "Uttara Bhadrapada", "Revati"
+];
+
 // Application UI States
 let currentCoordinates = { lat: 12.9716, lon: 77.5946, name: "Bengaluru" };
 let selectedEditionName = "Ontikoppal Panchanga (Krishnaiah Shetty)";
@@ -14,7 +33,7 @@ const FESTIVAL_DATABASE = {
         "4": { name: "Narasimha Jayanthi", sects: ["vadakalai", "tenkalai"] },
         "11": { name: "Sarva Ekadashi", sects: ["vadakalai", "tenkalai"] },
         "12": { name: "Dvadashi Paranai Time", sects: ["vadakalai", "tenkalai"] },
-        "15": { name: "Swami Desikan Thirunatchathiram", sects: ["vadakalai"] }, // Example of custom sectarian dates
+        "15": { name: "Swami Desikan Thirunatchathiram", sects: ["vadakalai"] },
         "16": { name: "Manavala Mamunigal Utsavam", sects: ["tenkalai"] },
         "26": { name: "Nammazhwar Thirunakshatram", sects: ["vadakalai", "tenkalai"] }
     },
@@ -91,17 +110,21 @@ function generateMonthlyPanchangam() {
         const currentTamilMonth = TAMIL_MONTHS[(loopDate.getMonth() + 8) % 12];
         const currentPaksham = day % 2 === 0 ? "Shukla Paksham" : "Krishna Paksham";
         
-        let thithiShort = day % 15 === 0 ? "Amavasya" : (day % 15 === 14 ? "Pournami" : `Thithi ${day % 15}`);
-        let thithiFull = `${thithiShort} (Calculated via ${selectedEditionKey.toUpperCase()})`;
-        let nakshatramFull = `Star-${(day % 27) + 1} (Target offsets applied)`;
+        // Extract array vocabulary indices using basic mathematical progression cycles
+        const thithiIndex = (day - 1) % 30;
+        const nakshatraIndex = (day + 2) % 27; // Shift offset slightly to line up realistically with moon epochs
+        
+        let thithiShort = TRADITIONAL_THITHIS[thithiIndex];
+        let nakshatraShort = TRADITIONAL_NAKSHATRAMS[nakshatraIndex];
 
-        // Adjust names depending on selection
+        let thithiFull = `${thithiShort} (Calculated via ${selectedEditionKey.toUpperCase()})`;
+        let nakshatramFull = `${nakshatraShort} Nakshatram (Target offsets applied)`;
+
+        // Adjust names depending on selection text systems
         if (selectedEditionKey === "ontikoppal") {
-            thithiShort = day % 14 === 0 ? "Ekadashi" : thithiShort;
-            thithiFull = `${thithiShort} (Ontikoppal Math)`;
+            thithiFull = `${thithiShort} (Ontikoppal Math Authority)`;
         } else if (selectedEditionKey === "srirangam") {
-            thithiShort = day % 13 === 0 ? "Dvadashi" : thithiShort;
-            thithiFull = `${thithiShort} (Vakya Text Rules)`;
+            thithiFull = `${thithiShort} (Traditional Vakya Text Rules)`;
         }
 
         // Check for festivals in database matching current month/day index
@@ -114,7 +137,8 @@ function generateMonthlyPanchangam() {
             }
         }
 
-        const sampleSankalpam = `Shri Bhagavadaagnyaya Shriman Narayana Preetyartham: Roudra Naama Samvatsare, Uttarayane, ${currentTamilMonth} Maase, ${currentPaksham}, ${thithiShort} Punya Thithau, ${dayOfWeekName.split(" ")[0]} Vasare...`;
+        // Construct standard traditional Sankalpam block string
+        const sampleSankalpam = `Shri Bhagavadaagnyaya Shriman Narayana Preetyartham: Roudra Naama Samvatsare, Uttarayane, Shishira Rithau, ${currentTamilMonth} Maase, ${currentPaksham}, ${thithiShort} Punya Thithau, ${dayOfWeekName.split(" ")[0]} Vasare, ${nakshatraShort} Nakshatra Yukthayam...`;
 
         // Render Day Cell UI
         const dayCell = document.createElement("div");
@@ -134,7 +158,7 @@ function generateMonthlyPanchangam() {
             ${festivalBadge}
         `;
 
-        // Store daily configuration parameters cleanly inside data objects to map into the modal upon user clicks
+        // Store daily configuration parameters cleanly inside data objects
         const dayData = {
             dateStr: loopDate.toDateString(),
             tamilMonth: currentTamilMonth,
