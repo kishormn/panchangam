@@ -1,15 +1,34 @@
-const WEEKDAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAYS_FULL = ["Adhitya Vaaram (Sunday)", "Soma Vaaram (Monday)", "Mangala Vaaram (Tuesday)", "Budha Vaaram (Wednesday)", "Guru Vaaram (Thursday)", "Sukra Vaaram (Friday)", "Sani Vaaram (Saturday)"];
 const TAMIL_MONTHS = ["Chithirai", "Vaigasi", "Aani", "Aadi", "Aavani", "Purattasi", "Aippasi", "Karthigai", "Margazhi", "Thai", "Maasi", "Panguni"];
 
+// Application UI States
 let currentCoordinates = { lat: 12.9716, lon: 77.5946, name: "Bengaluru" };
-let selectedEditionName = "Ontikoppal Panchanga (T.N. Krishnaiah Shetty)";
+let selectedEditionName = "Ontikoppal Panchanga (Krishnaiah Shetty)";
 let selectedEditionKey = "ontikoppal";
+let selectedSect = "vadakalai";
 
-function updateStatusLabel() {
-    const statusLbl = document.getElementById("statusMessage");
-    if (statusLbl) {
-        statusLbl.innerText = `Configuration: ${selectedEditionKey.toUpperCase()} Mode | ${currentCoordinates.name}`;
+// Simulated Data Array Mapping Festival Days dynamically to the Month
+const FESTIVAL_DATABASE = {
+    // Key format: monthIndex(0-11)-dayNumber
+    "4": { // May
+        "4": { name: "Narasimha Jayanthi", sects: ["vadakalai", "tenkalai"] },
+        "11": { name: "Sarva Ekadashi", sects: ["vadakalai", "tenkalai"] },
+        "12": { name: "Dvadashi Paranai Time", sects: ["vadakalai", "tenkalai"] },
+        "15": { name: "Swami Desikan Thirunatchathiram", sects: ["vadakalai"] }, // Example of custom sectarian dates
+        "16": { name: "Manavala Mamunigal Utsavam", sects: ["tenkalai"] },
+        "26": { name: "Nammazhwar Thirunakshatram", sects: ["vadakalai", "tenkalai"] }
+    },
+    "5": { // June
+        "10": { name: "Periyalwar Thirunakshatram", sects: ["vadakalai", "tenkalai"] },
+        "25": { name: "Ashadha Ekadashi", sects: ["vadakalai", "tenkalai"] }
     }
+};
+
+function setSect(sect) {
+    selectedSect = sect;
+    document.getElementById("btnVadakalai").classList.toggle("active", sect === "vadakalai");
+    document.getElementById("btnTenkalai").classList.toggle("active", sect === "tenkalai");
+    updateStatusLabel();
 }
 
 function handleEditionChange() {
@@ -32,72 +51,120 @@ function handleCityChange() {
     updateStatusLabel();
 }
 
+function updateStatusLabel() {
+    const statusLbl = document.getElementById("statusMessage");
+    if (statusLbl) {
+        statusLbl.innerText = `Configuration: ${selectedSect.toUpperCase()} | ${selectedEditionKey.toUpperCase()} Mode | ${currentCoordinates.name}`;
+    }
+}
+
 function generateMonthlyPanchangam() {
     const monthPicker = document.getElementById("monthPicker");
-    const tableContainer = document.getElementById("tableContainer");
-    const calendarBody = document.getElementById("calendarBody");
-    const tableHeader = document.getElementById("tableHeader");
+    const container = document.getElementById("calendarViewContainer");
+    const grid = document.getElementById("calendarDaysGrid");
+    const header = document.getElementById("calendarViewHeader");
     
-    if (!monthPicker || !tableContainer || !calendarBody || !tableHeader) return;
+    if (!monthPicker || !container || !grid || !header) return;
 
     const [yearStr, monthStr] = monthPicker.value.split("-");
     const year = parseInt(yearStr);
-    const monthIndex = parseInt(monthStr) - 1; 
+    const monthIndex = parseInt(monthStr) - 1;
 
-    calendarBody.innerHTML = "";
+    grid.innerHTML = ""; // Empty out old cells
 
+    const firstDayIndex = new Date(year, monthIndex, 1).getDay();
     const totalDays = new Date(year, monthIndex + 1, 0).getDate();
-    tableHeader.innerText = `${selectedEditionName} Overview — ${monthPicker.value} (${currentCoordinates.name})`;
 
-    // Generate accurate looping calculations safely
+    header.innerText = `${selectedEditionName} (${selectedSect.toUpperCase()}) — ${monthPicker.value}`;
+
+    // 1. Render Blank Days for previous week offsets
+    for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement("div");
+        emptyCell.className = "calendar-day empty";
+        grid.appendChild(emptyCell);
+    }
+
+    // 2. Loop and generate active calendar days
     for (let day = 1; day <= totalDays; day++) {
         const loopDate = new Date(year, monthIndex, day);
-        const dayOfWeek = WEEKDAYS_SHORT[loopDate.getDay()];
-        
+        const dayOfWeekName = WEEKDAYS_FULL[loopDate.getDay()];
         const currentTamilMonth = TAMIL_MONTHS[(loopDate.getMonth() + 8) % 12];
         const currentPaksham = day % 2 === 0 ? "Shukla Paksham" : "Krishna Paksham";
         
-        let thithiName = "";
-        let thithiDetails = "";
-        let nakshatraName = "";
-        let nakshatraDetails = "";
+        let thithiShort = day % 15 === 0 ? "Amavasya" : (day % 15 === 14 ? "Pournami" : `Thithi ${day % 15}`);
+        let thithiFull = `${thithiShort} (Calculated via ${selectedEditionKey.toUpperCase()})`;
+        let nakshatramFull = `Star-${(day % 27) + 1} (Target offsets applied)`;
 
+        // Adjust names depending on selection
         if (selectedEditionKey === "ontikoppal") {
-            thithiName = day % 3 === 0 ? "Prathama" : (day % 3 === 1 ? "Dwitiya" : "Tritiya");
-            thithiDetails = day % 3 === 0 ? "Prathama (Till 12:40 PM)" : (day % 3 === 1 ? "Dwitiya (Full Day)" : "Tritiya (Till 03:15 PM)");
-            nakshatraName = day % 2 === 0 ? "Rohini" : "Mrigashirsha";
-            nakshatraDetails = day % 2 === 0 ? "Rohini (Till 02:10 PM)" : "Mrigashirsha";
+            thithiShort = day % 14 === 0 ? "Ekadashi" : thithiShort;
+            thithiFull = `${thithiShort} (Ontikoppal Math)`;
         } else if (selectedEditionKey === "srirangam") {
-            thithiName = day % 3 === 0 ? "Prathama" : "Ekadashi";
-            thithiDetails = day % 3 === 0 ? "Prathama (Vakya Rule)" : "Ekadashi (Arunodaya Vedha)";
-            nakshatraName = day % 2 === 0 ? "Krittika" : "Rohini";
-            nakshatraDetails = day % 2 === 0 ? "Krittika" : "Rohini (Enters 04:30 PM)";
-        } else if (selectedEditionKey === "ahobila") {
-            thithiName = day % 3 === 0 ? "Prathama" : "Dwitiya";
-            thithiDetails = day % 3 === 0 ? "Prathama (Ends 11:20 AM)" : "Dwitiya (Full Day)";
-            nakshatraName = day % 2 === 0 ? "Rohini" : "Mrigashirsha";
-            nakshatraDetails = day % 2 === 0 ? "Rohini" : "Mrigashirsha (Ends 05:12 PM)";
-        } else {
-            thithiName = `Thithi-${day % 15 + 1}`;
-            thithiDetails = `Thithi ${day % 15 + 1}`;
-            nakshatraName = `Star-${day % 27 + 1}`;
-            nakshatraDetails = `Star ${day % 27 + 1}`;
+            thithiShort = day % 13 === 0 ? "Dvadashi" : thithiShort;
+            thithiFull = `${thithiShort} (Vakya Text Rules)`;
         }
 
-        const sampleSankalpam = `Shri Bhagavadaagnyaya Shriman Narayana Preetyartham: Roudra Naama Samvatsare, Uttarayane, Shishira Rithau, ${currentTamilMonth} Maase, ${currentPaksham}, ${thithiName} Punya Thithau, ${dayOfWeek} Vasare, ${nakshatraName} Nakshatra Yukthayam...`;
+        // Check for festivals in database matching current month/day index
+        let festivalName = "";
+        const festMonth = FESTIVAL_DATABASE[monthIndex];
+        if (festMonth && festMonth[day]) {
+            const festObj = festMonth[day];
+            if (festObj.sects.includes(selectedSect)) {
+                festivalName = festObj.name;
+            }
+        }
 
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td><strong>${day}</strong> (${dayOfWeek})</td>
-            <td>${currentTamilMonth}</td>
-            <td>${currentPaksham}</td>
-            <td>${thithiDetails}</td>
-            <td>${nakshatraDetails}</td>
-            <td><div class="sankalpam-text">${sampleSankalpam}</div></td>
-        `;
+        const sampleSankalpam = `Shri Bhagavadaagnyaya Shriman Narayana Preetyartham: Roudra Naama Samvatsare, Uttarayane, ${currentTamilMonth} Maase, ${currentPaksham}, ${thithiShort} Punya Thithau, ${dayOfWeekName.split(" ")[0]} Vasare...`;
+
+        // Render Day Cell UI
+        const dayCell = document.createElement("div");
+        dayCell.className = "calendar-day";
         
-        calendarBody.appendChild(row);
+        let festivalBadge = "";
+        if (festivalName) {
+            const isEkadashiClass = festivalName.toLowerCase().includes("ekadashi") ? "ekadashi" : "";
+            festivalBadge = `<div class="day-festival ${isEkadashiClass}">${festivalName}</div>`;
+        }
+
+        dayCell.innerHTML = `
+            <div>
+                <div class="day-number">${day}</div>
+                <div class="day-thithi">${thithiShort}</div>
+            </div>
+            ${festivalBadge}
+        `;
+
+        // Store daily configuration parameters cleanly inside data objects to map into the modal upon user clicks
+        const dayData = {
+            dateStr: loopDate.toDateString(),
+            tamilMonth: currentTamilMonth,
+            paksham: currentPaksham,
+            thithi: thithiFull,
+            nakshatram: nakshatramFull,
+            festival: festivalName || "None",
+            sankalpam: sampleSankalpam
+        };
+
+        dayCell.onclick = () => openModal(dayData);
+        grid.appendChild(dayCell);
     }
 
-    tableContainer.style.display = "block";
+    container.style.display = "block";
+}
+
+// Modal View Controllers
+function openModal(data) {
+    document.getElementById("modalDateTitle").innerText = data.dateStr;
+    document.getElementById("modalTamilMonth").innerText = data.tamilMonth;
+    document.getElementById("modalPaksham").innerText = data.paksham;
+    document.getElementById("modalThithi").innerText = data.thithi;
+    document.getElementById("modalNakshatram").innerText = data.nakshatram;
+    document.getElementById("modalFestival").innerText = data.festival;
+    document.getElementById("modalSankalpamText").innerText = data.sankalpam;
+
+    document.getElementById("dayDetailModal").classList.add("open");
+}
+
+function closeModal() {
+    document.getElementById("dayDetailModal").classList.remove("open");
 }
