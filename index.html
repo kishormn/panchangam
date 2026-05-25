@@ -5,47 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iyengar Monthly Public Panchangam</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #fcfcfc; padding: 15px; text-align: center; color: #333; }
-        .container { max-width: 950px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-top: 5px solid #d32f2f; }
-        h1 { color: #d32f2f; font-size: 24px; margin-bottom: 5px; }
-        .picker-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #eee; text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        @media(max-width: 600px) { .picker-section { grid-template-columns: 1fr; } }
-        label { font-weight: bold; font-size: 13px; color: #555; display: block; margin-bottom: 4px; }
-        .select-style, input[type="month"] { width: 100%; padding: 10px; font-size: 15px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #fcfcfc; padding: 15px; text-align: center; color: #333; margin: 0; }
+        .container { max-width: 1000px; margin: 20px auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid #d32f2f; }
+        h1 { color: #d32f2f; font-size: 26px; margin-bottom: 5px; }
+        
+        /* Picker Row Styles */
+        .picker-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #eee; text-align: left; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        label { font-weight: bold; font-size: 12px; color: #555; display: block; margin-bottom: 4px; }
+        .select-style, input[type="month"] { width: 100%; padding: 10px; font-size: 14px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; background: white; }
+        
+        /* Sect Toggle Option Button Matrix */
+        .sect-toggle-container { display: flex; gap: 10px; margin-top: 2px; }
+        .sect-btn { flex: 1; padding: 10px; font-weight: bold; border: 2px solid #ccc; background: #fff; border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .sect-btn.active { border-color: #d32f2f; background: #fff5f5; color: #d32f2f; }
+
         .btn-calc { background: #d32f2f; color: white; border: none; padding: 14px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
         .status-msg { font-size: 13px; color: #666; font-style: italic; text-align: center; grid-column: 1 / -1; margin-top: 5px; }
-        .table-responsive { width: 100%; overflow-x: auto; margin-top: 25px; display: none; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-        th, td { padding: 12px 10px; border: 1px solid #ddd; vertical-align: top; }
-        th { background-color: #d32f2f; color: white; font-weight: bold; }
-        tr:nth-child(even) { background-color: #fdfaf4; }
-        .sankalpam-text { font-size: 11px; color: #666; background: #fffde7; padding: 6px; border-radius: 4px; border: 1px dashed #e0d090; max-height: 80px; overflow-y: auto; line-height: 1.4; }
+        
+        /* 🗓️ Grid Wall Calendar Styles */
+        .calendar-container { margin-top: 25px; display: none; }
+        .calendar-header-title { color: #d32f2f; text-align: left; margin-bottom: 15px; border-bottom: 2px solid #d32f2f; padding-bottom: 5px; font-size: 20px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 10px; }
+        .weekday-label { background: #ffebee; color: #b71c1c; font-weight: bold; padding: 8px; font-size: 12px; border-radius: 4px; text-transform: uppercase; }
+        
+        /* Daily Grid Block Styles */
+        .calendar-day { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; min-height: 90px; padding: 8px; text-align: left; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: 0.2s; box-sizing: border-box; }
+        .calendar-day:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.08); border-color: #d32f2f; }
+        .calendar-day.empty { background: #f5f5f5; border: none; cursor: default; pointer-events: none; }
+        
+        .day-number { font-size: 16px; font-weight: bold; color: #333; }
+        .day-thithi { font-size: 11px; color: #c2185b; font-weight: bold; margin-top: 2px; }
+        .day-festival { font-size: 11px; background: #e8f5e9; color: #2e7d32; padding: 2px 4px; border-radius: 3px; font-weight: bold; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .day-festival.ekadashi { background: #e3f2fd; color: #1565c0; }
+        
+        /* 🔍 Popup Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; visibility: hidden; opacity: 0; transition: 0.3s; }
+        .modal-overlay.open { visibility: visible; opacity: 1; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; text-align: left; box-shadow: 0 5px 20px rgba(0,0,0,0.3); border-top: 6px solid #d32f2f; position: relative; }
+        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 24px; font-weight: bold; color: #aaa; cursor: pointer; }
+        .modal-close:hover { color: #333; }
+        .modal-line { margin: 12px 0; font-size: 15px; border-bottom: 1px dashed #eee; padding-bottom: 6px; }
+        .modal-sankalpam { background: #fffde7; border: 1px dashed #e0d090; padding: 12px; border-radius: 6px; font-size: 13px; font-style: italic; line-height: 1.5; color: #444; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>🕉️ Iyengar Monthly Public Panchangam</h1>
-    <p style="color:#666; font-size: 14px; margin-top: 0;">Full Month Almanac Calendar Display Grid</p>
+    <p style="color:#666; font-size: 14px; margin-top: 0;">Interactive Wall-Calendar Style Utility</p>
     
     <div class="picker-section">
+        <!-- 1. SECT PICKER -->
         <div>
-            <label for="editionSelect">📖 SELECT PANCHANGAM EDITION / EDITION:</label>
+            <label>🕉️ IYENGAR SAMPRADAYAM SECT:</label>
+            <div class="sect-toggle-container">
+                <button type="button" id="btnVadakalai" class="sect-btn active" onclick="setSect('vadakalai')">Vadakalai</button>
+                <button type="button" id="btnTenkalai" class="sect-btn" onclick="setSect('tenkalai')">Tenkalai</button>
+            </div>
+        </div>
+
+        <!-- 2. ALMANAC AUTHORITIES -->
+        <div>
+            <label for="editionSelect">📖 PANCHANGAM AUTHORITY SYSTEM:</label>
             <select id="editionSelect" class="select-style" onchange="handleEditionChange()">
-                <option value="ontikoppal">Ontikoppal Panchanga (T.N. Krishnaiah Shetty)</option>
+                <option value="ontikoppal">Ontikoppal Panchanga (Krishnaiah Shetty)</option>
                 <option value="srirangam">Srirangam Vakya Panchangam</option>
                 <option value="ahobila">Ahobila Mutt Panchangam Edition</option>
-                <option value="drigganitha">Pure Drigganitha Modern Engine</option>
             </select>
         </div>
 
+        <!-- 3. TARGET MONTH -->
         <div>
-            <label for="monthPicker">📅 SELECT TARGET MONTH & YEAR:</label>
+            <label for="monthPicker">📅 TARGET CALENDAR MONTH:</label>
             <input type="month" id="monthPicker" value="2026-05">
         </div>
 
-        <div style="grid-column: 1 / -1;">
-            <label for="citySelect">📍 TARGET GEOGRAPHY LOCATION:</label>
+        <!-- 4. LOCATION SELECTION -->
+        <div>
+            <label for="citySelect">📍 GEOGRAPHY LOCATION:</label>
             <select id="citySelect" class="select-style" onchange="handleCityChange()">
                 <option value="12.9716,77.5946">Bengaluru (Default)</option>
                 <option value="13.0827,80.2707">Chennai (Madras)</option>
@@ -55,28 +92,46 @@
             </select>
         </div>
 
-        <div id="statusMessage" class="status-msg">Configuration: ONTIKOPPAL Mode | Bengaluru</div>
+        <div id="statusMessage" class="status-msg">Configuration: VADAKALAI | ONTIKOPPAL | Bengaluru</div>
     </div>
 
-    <button class="btn-calc" onclick="generateMonthlyPanchangam()">Generate Full Month Almanac Table</button>
+    <button class="btn-calc" onclick="generateMonthlyPanchangam()">Generate Interactive Calendar View</button>
 
-    <div id="tableContainer" class="table-responsive">
-        <h3 id="tableHeader" style="color: #d32f2f; text-align: left; margin-bottom: 15px; border-bottom: 2px solid #d32f2f; padding-bottom: 5px;"></h3>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 10%;">Date / Day</th>
-                    <th style="width: 12%;">Tamil Month</th>
-                    <th style="width: 13%;">Paksham</th>
-                    <th style="width: 20%;">Thithi Details</th>
-                    <th style="width: 20%;">Nakshatram Details</th>
-                    <th style="width: 25%;">Daily Sankalpam Script</th>
-                </tr>
-            </thead>
-            <tbody id="calendarBody">
-                <!-- Data cells get dynamically loaded here -->
-            </tbody>
-        </table>
+    <!-- 🗓️ DYNAMIC GRID VIEW CONTAINER -->
+    <div id="calendarViewContainer" class="calendar-container">
+        <h3 id="calendarViewHeader" class="calendar-header-title"></h3>
+        
+        <div class="calendar-grid">
+            <div class="weekday-label">Sun</div>
+            <div class="weekday-label">Mon</div>
+            <div class="weekday-label">Tue</div>
+            <div class="weekday-label">Wed</div>
+            <div class="weekday-label">Thu</div>
+            <div class="weekday-label">Fri</div>
+            <div class="weekday-label">Sat</div>
+        </div>
+        <div id="calendarDaysGrid" class="calendar-grid">
+            <!-- Calendar day items injected here -->
+        </div>
+    </div>
+</div>
+
+<!-- 🔍 OVERLAY MODAL DISPLAY -->
+<div id="dayDetailModal" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <h3 id="modalDateTitle" style="color:#d32f2f; margin-top:0; border-bottom: 2px solid #eee; padding-bottom: 8px;">Date Details</h3>
+        
+        <div class="modal-line"><strong>Tamil Month:</strong> <span id="modalTamilMonth"></span></div>
+        <div class="modal-line"><strong>Paksham:</strong> <span id="modalPaksham"></span></div>
+        <div class="modal-line"><strong>Daily Thithi:</strong> <span id="modalThithi"></span></div>
+        <div class="modal-line"><strong>Daily Nakshatram:</strong> <span id="modalNakshatram"></span></div>
+        <div class="modal-line" id="modalFestivalRow" style="color: #2e7d32; font-weight: bold;"><strong>Festival/Utsavam:</strong> <span id="modalFestival">None</span></div>
+        
+        <div class="modal-sankalpam">
+            <strong>Daily Sankalpam Text Fragment:</strong>
+            <p id="modalSankalpamText" style="margin: 6px 0 0 0; line-height: 1.5;"></p>
+        </div>
     </div>
 </div>
 
