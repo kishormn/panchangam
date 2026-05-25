@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iyengar Public Panchangam</title>
+    <!-- Simple CSS Styling for Elderly Readability -->
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #fcfcfc; padding: 20px; text-align: center; color: #333; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-top: 5px solid #d32f2f; }
+        h1 { color: #d32f2f; font-size: 24px; margin-bottom: 5px; }
+        .input-group { margin: 20px 0; display: flex; justify-content: center; gap: 10px; }
+        input { width: 90px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; text-align: center; }
+        button { background: #d32f2f; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .result-box { text-align: left; background: #fffcf5; border: 1px solid #f5ebd5; padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
+        .result-line { margin: 10px 0; font-size: 16px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🕉️ Iyengar Public Panchangam</h1>
+    <p style="color:#666; font-size: 14px; margin-top: 0;">Free Community Almanac Utility</p>
+    
+    <div class="input-group">
+        <input type="number" id="lat" value="12.9716" step="0.0001" placeholder="Lat">
+        <input type="number" id="lon" value="77.5946" step="0.0001" placeholder="Lon">
+        <button onclick="calculatePanchangam()">Get Almanac</button>
+    </div>
+
+    <div id="result" class="result-box">
+        <div class="result-line"><strong>Vaaram (Day):</strong> <span id="out-vaaram"></span></div>
+        <div class="result-line"><strong>Tamil Month:</strong> <span id="out-month"></span></div>
+        <div class="result-line"><strong>Paksham:</strong> <span id="out-paksha"></span></div>
+        <div class="result-line"><strong>Thithi:</strong> <span id="out-thithi"></span></div>
+        <div class="result-line"><strong>Nakshatram:</strong> <span id="out-nakshatra"></span></div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
