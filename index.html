@@ -24,12 +24,9 @@
     <p style="color:#666; font-size: 14px; margin-top: 0;">Free Community Almanac Utility</p>
     
     <div class="picker-section">
-        <!-- GPS Option -->
         <button class="btn-gps" onclick="getLocationByGPS()">📍 Use Current GPS Location</button>
-        
         <p style="margin: 5px 0; font-weight: bold; color: #888;">— OR SELECT CITY —</p>
         
-        <!-- Preset Dropdown Option -->
         <select id="citySelect" class="select-style" onchange="handleCityChange()">
             <option value="12.9716,77.5946">Bengaluru (Default)</option>
             <option value="13.0827,80.2707">Chennai (Madras)</option>
@@ -38,9 +35,6 @@
             <option value="11.9416,79.8083">Kanchipuram</option>
             <option value="12.1207,76.6710">Melukote / Mysore</option>
             <option value="13.6288,79.4192">Tirupati</option>
-            <option value="17.3850,78.4867">Hyderabad</option>
-            <option value="19.0760,72.8777">Mumbai</option>
-            <option value="28.6139,77.2090">New Delhi</option>
         </select>
 
         <div id="statusMessage" class="status-msg">Using Location: Bengaluru</div>
@@ -48,7 +42,7 @@
 
     <button class="btn-calc" onclick="generatePanchangam()">Calculate Daily Almanac</button>
 
-<div id="result" class="result-box">
+    <div id="result" class="result-box">
         <div class="result-line"><strong>Calculated Location:</strong> <span id="out-loc"></span></div>
         <div class="result-line"><strong>Vaaram (Day):</strong> <span id="out-vaaram"></span></div>
         <div class="result-line"><strong>Tamil Month:</strong> <span id="out-month"></span></div>
@@ -56,10 +50,9 @@
         <div class="result-line"><strong>Thithi:</strong> <span id="out-thithi"></span></div>
         <div class="result-line"><strong>Nakshatram:</strong> <span id="out-nakshatra"></span></div>
         
-        <!-- This is the newly added block for the automatic daily Sankalpam script -->
         <div class="result-line" style="background: #fff3cd; border: 1px dashed #ffeba0; padding: 12px; margin-top: 15px; border-radius: 6px;">
             <strong>Daily Sankalpam Script:</strong>
-            <p id="out-sankalpam" style="font-style: italic; line-height: 1.6; font-size: 15px; margin: 8px 0 0 0; color: #555;"></p>
+            <p id="out-sankalpam" style="font-style: italic; line-height: 1.6; font-size: 14px; margin: 8px 0 0 0; color: #444;"></p>
         </div>
     </div>
 </div>
